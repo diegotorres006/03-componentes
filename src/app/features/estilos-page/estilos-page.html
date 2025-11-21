@@ -1,7 +1,7 @@
 <section class="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8">
 
-    <h1 class="text-4xl font-bold text-gray-800 mb-4">
-        TailwindCSS en acción
+    <h1 class="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
+        TailwindCSS Responsivo
     </h1>
 
     <p class="text-lg text-gray-600 mb-10 text-center max-w-2xl">
@@ -13,7 +13,6 @@
 
         <div class="bg-white shadow rounded-lg p-6 flex flex-col items-center">
             <i class="fa-solid fa-palette text-4xl text-blue-500 mb-2"></i>
-            
             <h3 class="text-lg font-semibold mb-2">Colores</h3>
             <p class="text-gray-500 text-center">
                 Aplica paletas personalizadas mediante clases como <code>bg-blue-500</code>.
@@ -21,8 +20,7 @@
         </div>
 
         <div class="bg-white shadow rounded-lg p-6 flex flex-col items-center">
-            <i class="fa-solid fa-arrows-left-right-to-line text-4xl text-purple-500 mb-2"></i>
-
+            <i class="fa-solid fa-arrows-left-right-to-line text-4xl text-green-500 mb-2"></i>
             <h3 class="text-lg font-semibold mb-2">Espaciado</h3>
             <p class="text-gray-500 text-center">
                 Controla márgenes y rellenos con <code>m-</code> y <code>p-</code>.
@@ -30,8 +28,7 @@
         </div>
 
         <div class="bg-white shadow rounded-lg p-6 flex flex-col items-center">
-            <i class="fa-solid fa-layer-group text-4xl text-green-500 mb-2"></i>
-
+            <i class="fa-solid fa-layer-group text-4xl text-purple-500 mb-2"></i>
             <h3 class="text-lg font-semibold mb-2">Layout</h3>
             <p class="text-gray-500 text-center">
                 Crea estructuras flexibles con <code>flex</code> y <code>grid</code>.
@@ -41,9 +38,11 @@
     </div>
 
     <div class="mt-10">
-        <button class="bg-blue-600 text-white font-bold py-2 px-6 rounded hover:bg-blue-700 transition duration-300">
+        <button class="px-5 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors">
             Botón interactivo
         </button>
     </div>
+
+    <app-signal-box></app-signal-box>
 
 </section>

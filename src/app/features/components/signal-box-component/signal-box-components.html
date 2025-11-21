@@ -1,0 +1,61 @@
+<section class="flex flex-col items-center justify-center p-6 gap-4 border-t mt-8 w-full">
+    
+    <h2 class="text-xl font-semibold text-gray-700 mb-2">
+        Ejemplo 1: Signal y Color
+    </h2>
+
+    <input
+      type="number"
+      placeholder="Escribe un número"
+      class="border border-gray-300 rounded p-2 text-center w-40 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      (input)="cambiarValor($event)"
+    >
+
+    <div
+      class="w-32 h-32 flex items-center justify-center text-white font-bold rounded transition-all duration-500 text-3xl shadow-lg"
+      [class.bg-green-500]="valor() > 20"
+      [class.bg-red-500]="valor() <= 20"
+    >
+      {{ valor() }}
+    </div>
+    
+    <hr class="w-full border-gray-300 my-6">
+
+    <section class="flex flex-col items-center w-full gap-4">
+        <h2 class="text-xl font-semibold text-gray-700">
+            Barra de progreso interactiva
+        </h2>
+
+        <input
+            type="range"
+            min="0"
+            max="100"
+            [value]="progreso()"
+            class="w-80 h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-gray-600"
+            (input)="actualizarProgreso($event)"
+        >
+
+        <div class="relative w-80 h-6 bg-gray-200 rounded-full overflow-hidden shadow-inner border border-gray-300">
+            <div
+                class="h-full transition-all duration-300 ease-out flex items-center justify-center"
+                [style.width.%]="progreso()"
+                [class.bg-red-500]="progreso() < 40"
+                [class.bg-yellow-400]="progreso() >= 40 && progreso() < 70"
+                [class.bg-green-500]="progreso() >= 70"
+            >
+            </div>
+        </div>
+
+        <p class="text-lg font-medium text-gray-600">
+            Progreso: 
+            <span class="font-bold transition-colors duration-300"
+                [class.text-red-500]="progreso() < 40"
+                [class.text-yellow-500]="progreso() >= 40 && progreso() < 70"
+                [class.text-green-600]="progreso() >= 70"
+            >
+                {{ progreso() }}%
+            </span>
+        </p>
+    </section>
+
+</section>
