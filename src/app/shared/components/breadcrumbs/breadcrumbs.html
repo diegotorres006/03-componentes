@@ -1,0 +1,17 @@
+<!-- Breadcrumbs -->
+<div class="breadcrumbs text-sm px-6 py-3 bg-base-200 ">
+    <ul>
+        @for (item of items(); track item.label) {
+        <li>
+            @if (item.link) {
+            <a
+                [href]="item.link"
+                class="link link-hover"
+            >{{ item.label }}</a>
+            } @else {
+            <span>{{ item.label }}</span>
+            }
+        </li>
+        }
+    </ul>
+</div>

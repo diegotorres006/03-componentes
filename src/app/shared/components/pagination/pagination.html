@@ -1,0 +1,29 @@
+<div class="join flex justify-center items-center gap-2">
+  <button
+    class="join-item btn"
+    (click)="previousPage()"
+    [routerLink]="[]"
+    [queryParams]="{ page: activePage() - 1 }"
+    [disabled]="activePage() === 1"
+  >«</button>
+
+  @for (page of getPagesList(); track page) {
+  <button
+    class="join-item btn"
+    [class.btn-primary]="page === activePage()"
+    [routerLink]="[]"
+    [queryParams]="{ page: page }"
+    (click)="activePage.set(page)"
+  >
+    {{ page }}
+  </button>
+  }
+
+  <button
+    class="join-item btn"
+    [routerLink]="[]"
+    [queryParams]="{ page: activePage() + 1 }"
+    (click)="nextPage()"
+    [disabled]="activePage() === pages()"
+  >»</button>
+</div>

@@ -1,0 +1,85 @@
+<app-breadcumbs [items]="[
+    { label: 'Inicio', link: '/' },
+    { label: 'Simpsons', link: '/simpsons' },
+    { label: 'Personajes' }
+  ]" />
+
+<section class="p-6">
+  <app-hero-simpsons [simpsonsCount]=" simpsonsResource.value()?.count ?? 0"
+    [totalPages]="totalPages()"></app-hero-simpsons>
+
+  <!-- Tabla y paginación -->
+  <div class="mt-8">
+    <!-- ... contenido existente ... -->
+  </div>
+</section>
+
+<app-back-to-top></app-back-to-top>
+
+<section class="p-8">
+  <h1 class="text-3xl font-bold mb-2 text-center">The Simpsons API</h1>
+  <h2 class="text-lg text-center mb-6">Listado de personajes</h2>
+
+  <!-- Paginación y controles -->
+  @if (totalPages() > 0) {
+  <div class="flex gap-2 items-center h-20 mb-4">
+    <!-- Select desactivado (la API de los Simpsons no permite limitar resultados) -->
+    <!--
+    <select
+        class="select select-bordered w-32"
+        (change)="charactersPerPage.set(+selectPerPage.value)"
+        #selectPerPage
+    >
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+    </select>
+    -->
+    <app-pagination-component [pages]="totalPages()" [currentPage]="paginationService.currentPage()" />
+
+    <div class="flex flex-1"></div>
+  </div>
+  }
+
+  <!-- Tabla de personajes -->
+    @if (simpsonsResource.hasValue()) {
+    <div class="overflow-x-auto">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Ocupación</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (personaje of simpsonsResource.value().results; track personaje.id) {
+                <tr>
+                    <td>{{ personaje.id }}</td>
+                    <td>{{ personaje.name }}</td>
+                    <td>{{ personaje.occupation }}</td>
+                    <td>
+                        <span class="badge badge-{{ personaje.status === 'Alive' ? 'success' : 'error' }}">
+                            {{ personaje.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a
+                            [routerLink]="['/simpsons', personaje.id]"
+                            class="btn btn-sm btn-primary"
+                        >
+                            Ver Detalle
+                        </a>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+
+
+</section>

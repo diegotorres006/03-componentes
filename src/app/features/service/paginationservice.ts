@@ -10,9 +10,7 @@ export class PaginationService {
   // Convierte los parámetros de la URL (?page=2) en una señal reactiva
   currentPage = toSignal(
     this.activatedRoute.queryParamMap.pipe(
-      // Obtenemos el parámetro 'page', lo convertimos a número con el '+'. Si no existe, es 1.
       map((params) => (params.get('page') ? +params.get('page')! : 1)),
-      // Si por error alguien pone ?page=texto, esto asegura que devuelva 1
       map((page) => (isNaN(page) ? 1 : page))
     ),
     { initialValue: 1 }

@@ -1,0 +1,33 @@
+<section class="p-8">
+  @if (!personaje()) {
+  <div class="flex justify-center items-center h-64">
+    <span class="loading loading-spinner loading-lg"></span>
+  </div>
+  }
+
+  @if (personaje()) {
+  <div class="card bg-base-100 shadow-xl p-6 max-w-4xl mx-auto">
+    <figure>
+      <img
+        [src]="`https://cdn.thesimpsonsapi.com/500/character/${personaje()?.id}.webp`"
+        [alt]="personaje()?.name"
+        class="w-48 rounded-lg"
+      />
+    </figure>
+    <div class="card-body">
+      <h2 class="card-title text-2xl font-bold">{{ personaje()?.name }}</h2>
+      <p class="text-gray-600 mb-2">{{ personaje()?.occupation }}</p>
+      <p class="text-sm text-gray-500 mb-4">Estado: {{ personaje()?.status }}</p>
+      <p class="mb-4">{{ personaje()?.description }}</p>
+      <div>
+        <h3 class="font-semibold">Frases destacadas:</h3>
+        <ul class="list-disc pl-6">
+          @for (frase of personaje()?.phrases ?? []; track frase) {
+          <li>{{ frase }}</li>
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+  }
+</section>
