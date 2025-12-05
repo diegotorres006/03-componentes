@@ -1,22 +1,11 @@
 <div class="join">
-  <!-- Botón Anterior -->
-  <button 
-    class="join-item btn" 
-    [disabled]="currentPage <= 1"
-    (click)="onPrev()">
-    «
-  </button>
-
-  <!-- Botón de Página Actual (Informativo) -->
-  <button class="join-item btn btn-disabled bg-base-200 text-base-content font-bold">
-    Página {{ currentPage }} de {{ pages }}
-  </button>
-
-  <!-- Botón Siguiente -->
-  <button 
-    class="join-item btn" 
-    [disabled]="currentPage >= pages"
-    (click)="onNext()">
-    »
-  </button>
+    <!-- Botón Anterior -->
+    <button     class="join-item btn"     [disabled]="currentPage <= 1"     (click)="onPrev()">
+        «
+      </button>
+  ...
+    <!-- Botón Siguiente -->
+    <button     class="join-item btn"     [disabled]="currentPage >= pages"     (click)="onNext()">
+        »
+      </button>
 </div>

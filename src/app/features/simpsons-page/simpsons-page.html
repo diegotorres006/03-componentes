@@ -22,13 +22,13 @@
 
     @if (totalPages() > 0) {
     <div class="flex gap-2 items-center h-20 mb-4 justify-between">
-        <!-- Paginación conectada a los métodos locales -->
-        <app-pagination-component 
+        <!-- CORRECCIÓN 2: Uso del selector 'app-pagination' -->
+        <app-pagination 
             [pages]="totalPages()" 
             [currentPage]="currentPage()"
             (next)="nextPage()" 
             (prev)="prevPage()">
-        </app-pagination-component>
+        </app-pagination>
     </div>
     }
 
@@ -53,8 +53,12 @@
                     <td class="font-bold flex items-center gap-3">
                         <div class="avatar">
                             <div class="mask mask-squircle w-10 h-10">
-                                <!-- Usamos $any() para evitar errores de tipo TS estrictos -->
-                                <img [src]="$any(personaje).image" [alt]="personaje.name" />
+                                <!-- CORRECCIÓN 3: Se movió el onerror al tag <img> y se quitó el comentario -->
+                                <img 
+                                    [src]="$any(personaje).image" 
+                                    [alt]="personaje.name"
+                                    onerror="this.onerror=null; this.src='assets/img/simpson_fallback.png';"
+                                />
                             </div>
                         </div>
                         {{ personaje.name || $any(personaje).character }}
@@ -143,7 +147,13 @@
             @for (favorite of favorites(); track favorite.id) {
             <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
                 <figure class="px-4 pt-4 bg-base-200/30">
-                    <img [src]="favorite.image" [alt]="favorite.nombre" class="rounded-xl h-48 w-full object-contain" />
+                    <!-- CORRECCIÓN 4: Se movió el onerror al tag <img> del Favorito -->
+                    <img 
+                        [src]="favorite.image" 
+                        [alt]="favorite.nombre" 
+                        class="rounded-xl h-48 w-full object-contain"
+                        onerror="this.onerror=null; this.src='assets/img/simpson_fallback.png';"
+                    />
                 </figure>
                 <div class="card-body p-5">
                     <h3 class="text-xs font-bold uppercase tracking-wider opacity-50">{{ favorite.nombre }}</h3>
@@ -192,16 +202,16 @@
 
 <!-- MODAL DE CONFIRMACIÓN -->
 <dialog id="delete_modal" class="modal modal-bottom sm:modal-middle">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg text-error">Confirmar eliminación</h3>
-    <p class="py-4">¿Estás seguro de que deseas eliminar este personaje de tus favoritos?</p>
-    <div class="modal-action">
-      <form method="dialog">
-        <!-- El botón "Cancelar" cierra el modal (comportamiento por defecto de form dialog) -->
-        <button class="btn btn-ghost mr-2" (click)="favoriteToDeleteId.set(null)">Cancelar</button>
-        <!-- El botón eliminar ejecuta la acción -->
-        <button class="btn btn-error" (click)="confirmDelete()">Sí, Eliminar</button>
-      </form>
+    <div class="modal-box">
+        <h3 class="font-bold text-lg text-error">Confirmar eliminación</h3>
+        <p class="py-4">¿Estás seguro de que deseas eliminar este personaje de tus favoritos?</p>
+        <div class="modal-action">
+            <form method="dialog">
+                <!-- El botón "Cancelar" cierra el modal (comportamiento por defecto de form dialog) -->
+                <button class="btn btn-ghost mr-2" (click)="favoriteToDeleteId.set(null)">Cancelar</button>
+                <!-- El botón eliminar ejecuta la acción -->
+                <button class="btn btn-error" (click)="confirmDelete()">Sí, Eliminar</button>
+            </form>
+        </div>
     </div>
-  </div>
 </dialog>

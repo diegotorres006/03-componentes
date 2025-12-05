@@ -1,7 +1,7 @@
 import { Component, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { AuthService } from '../../../../core/services/firebase/auth';
@@ -18,16 +18,17 @@ export class LoginPageComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute); // AGREGADO
 
   loginForm: FormGroup;
   formUtils = FormUtils;
+  private returnUrl: string = '/home'; // AGREGADO: Valor por defecto
 
   // Signal para disparar la petición de login normal (Email/Pass)
   private loginTrigger = signal<{ email: string; password: string } | null>(null);
 
   // Recurso reactivo para el login normal
   loginResource = rxResource({
-    // CORRECCIÓN: Usamos 'params' y 'stream' en lugar de 'request' y 'loader'
     params: () => this.loginTrigger(),
     stream: ({ params }) => {
       if (!params) return of(null);
@@ -37,7 +38,7 @@ export class LoginPageComponent {
 
   // Computed signals
   loading = this.loginResource.isLoading;
-  
+
   errorMessage = () => {
     const error = this.loginResource.error();
     if (!error) return '';
@@ -60,19 +61,24 @@ export class LoginPageComponent {
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
 
+    // AGREGADO: Obtener returnUrl de los query params (Paso 1)
+    // El error TS2571: Object is of type 'unknown' en this.route.snapshot
+    // se resolverá con el fix de importación, pues ActivatedRoute tiene tipos definidos.
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
+
+
     // Efecto para monitorear y redirigir tras login exitoso (Email/Pass)
     effect(() => {
       const result = this.loginResource.value();
-      
-      // Logs para depuración
+
       if (this.loginResource.isLoading()) console.log('⏳ Cargando login...');
-      
+
       if (result) {
-        console.log('✅ Login (Email/Pass) exitoso detectado. Navegando a /simpsons...');
-        // Pequeño timeout para asegurar que el router y el guard estén sincronizados
+        console.log(`✅ Login exitoso. Navegando a ${this.returnUrl}...`);
+        // USO DEL returnUrl EN LUGAR DE RUTA FIJA
         setTimeout(() => {
-          this.router.navigate(['/simpsons']).then(success => {
-             if (!success) console.error('❌ La navegación fue bloqueada (posiblemente por el Guard)');
+          this.router.navigateByUrl(this.returnUrl).then(success => {
+            if (!success) console.error('❌ La navegación fue bloqueada (posiblemente por el Guard)');
           });
         }, 100);
       }
@@ -94,8 +100,11 @@ export class LoginPageComponent {
     this.authService.loginWithGoogle().subscribe({
       next: (user) => {
         console.log('✅ Google Login exitoso:', user);
-        console.log('🚀 Navegando a /simpsons...');
-        this.router.navigate(['/simpsons']);
+        console.log(`🚀 Navegando a ${this.returnUrl}...`);
+        // USO DEL returnUrl EN LUGAR DE RUTA FIJA
+        setTimeout(() => {
+          this.router.navigateByUrl(this.returnUrl);
+        }, 50);
       },
       error: (err) => {
         console.error('❌ Error en Google Login:', err);

@@ -8,42 +8,43 @@ import { authGuard } from '../app/core/guards/auth-guard';
 import { publicGuard } from '../app/core/guards/public-guard';
 
 export const routes: Routes = [
-
   {
     path: '',
-    redirectTo: 'login', // Redirige al login por defecto
+    redirectTo: 'home', // Redirige a home por defecto (Paso 1)
     pathMatch: 'full'
   },
   {
     path: 'login',
     loadComponent: () => import('./features/auth/pages/login-page/login-page').then(m => m.LoginPageComponent),
-    canActivate: [publicGuard]
+    canActivate: [publicGuard] // Solo si NO está autenticado
   },
   {
     path: 'register',
     loadComponent: () => import('./features/auth/pages/register-page/register-page').then(m => m.RegisterPage),
-    canActivate: [publicGuard]
-  },
-  // La ruta de simpsons solo debe aparecer UNA vez y debe ser la protegida
-  {
-    path: 'simpsons',
-    loadComponent: () => import('./features/simpsons-page/simpsons-page').then(m => m.SimpsonsPageComponent),
-    canActivate: [authGuard] 
+    canActivate: [publicGuard] // Solo si NO está autenticado
   },
   {
-    path: 'simpsons/:id',
-    component: SimpsonsDetailPage,
-    canActivate: [authGuard] // También deberías proteger el detalle
+    path: 'home',
+    loadComponent: () => import('./features/daisyui-page/daisyui-page').then(m => m.DaisyuiPageComponent)
+    // SIN guard: Accesible para todos (Paso 1)
   },
   {
     path: 'estilos',
-    component: EstilosPage,
-    canActivate: [authGuard]
+    loadComponent: () => import('./features/estilos-page/estilos-page').then(m => m.EstilosPage),
+    canActivate: [authGuard] // Requiere autenticación
   },
   {
-     path: 'home', // Si usas home para DaisyUI
-     component: DaisyuiPageComponent,
-     canActivate: [authGuard]
+    path: 'simpsons',
+    loadComponent: () => import('../app/features/simpsons-page/simpsons-page').then(m => m.SimpsonsPageComponent),
+    canActivate: [authGuard] // Requiere autenticación
+  },
+  {
+    path: 'simpsons/:id',
+    loadComponent: () => import('./features/simpson-detail-page/simpson-detail-page').then(m => m.SimpsonsDetailPage),
+    canActivate: [authGuard] // Requiere autenticación
+  },
+  {
+    path: '**',
+    redirectTo: 'home'
   }
-
 ];

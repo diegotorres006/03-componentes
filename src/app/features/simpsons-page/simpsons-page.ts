@@ -7,15 +7,12 @@ import { catchError, of, switchMap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
 // --- SERVICIOS ---
-// Ajustamos las rutas a lo estándar, pero mantenemos tu lógica de inyección
-import { PaginationService } from '../../../app/features/service/paginationservice'; // Ajustado a core/services
-import { SimpsonsService } from '../../features/simpsons/services/simpsons-service';     // Ajustado a core/services
-import { FavoritesService } from '../simpsons/services/favorites';  // Ajustado con .service
-import { AuthService } from '../../core/services/firebase/auth';    // Ajustado con .service
+import { PaginationService } from '../../../app/features/service/paginationservice'; 
+import { SimpsonsService } from '../../features/simpsons/services/simpsons-service';    
+import { FavoritesService } from '../simpsons/services/favorites';  
+import { AuthService } from '../../core/services/firebase/auth';    
 
 // --- COMPONENTES ---
-// Mantenemos tus rutas de componentes personalizados
-// Asegúrate de que estos archivos existan en tu proyecto
 import { HeroSimpsons } from '../simpsons/components/hero-simpsons/hero-simpsons';
 import { PaginationComponent } from '../../shared/components/pagination/pagination';
 import { BackToTop } from '../../shared/components/back-to-top/back-to-top';
@@ -43,13 +40,13 @@ export class SimpsonsPageComponent {
   private favoritesService = inject(FavoritesService);
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastrService); // Notificaciones
+  private toastr = inject(ToastrService); 
 
   // Estado UI
   charactersPerPage = signal(10);
   totalPages = signal(0);
   
-  // SOLUCIÓN: Gestionamos la página actual localmente
+  // Gestionamos la página actual localmente
   currentPage = signal(1);
 
   // Triggers
@@ -57,22 +54,34 @@ export class SimpsonsPageComponent {
   
   // Estado de Edición y Eliminación
   editingFavoriteId = signal<string | null>(null);
-  favoriteToDeleteId = signal<string | null>(null); // ID para el Modal
+  favoriteToDeleteId = signal<string | null>(null); 
   
   editForm: FormGroup;
 
   // --- 1. RECURSO: SIMPSONS ---
-  private simpsonsParams$ = computed(() => ({
-    page: this.currentPage() - 1,
-    limit: this.charactersPerPage()
-  }));
+  private simpsonsParams$ = computed(() => {
+    const page = this.currentPage();
+    const limit = this.charactersPerPage();
+    
+    // CORRECCIÓN CLAVE: Calcular el offset (desfase)
+    // Offset = (Página Actual - 1) * Límite
+    const offset = (page - 1) * limit;
+
+    return {
+      offset: offset, // Usamos el offset calculado
+      limit: limit
+    };
+  });
 
   simpsonsResource = toSignal(
     toObservable(this.simpsonsParams$).pipe(
-      switchMap(params => this.simpsonsService.getCharactersOptions({
-        offset: params.page, 
-        limit: params.limit
-      })),
+      switchMap(params => {
+        console.log(`Cargando página: ${this.currentPage()} con offset: ${params.offset}`);
+        return this.simpsonsService.getCharactersOptions({
+          offset: params.offset, 
+          limit: params.limit
+        });
+      }),
       catchError(error => {
         this.toastr.error('No se pudieron cargar los personajes', 'Error de API');
         return of({ results: [], count: 0, pages: 0 });
@@ -131,19 +140,19 @@ export class SimpsonsPageComponent {
     const imagen = character.image;
     
     if(nombre && imagen) {
-        this.loadingFavorites.set(true);
-        this.favoritesService.addFavorite(nombre, imagen).subscribe({
-            next: () => {
-                this.reloadFavorites();
-                this.toastr.success(`Agregado a favoritos`, '¡Éxito!');
-                this.loadingFavorites.set(false);
-            },
-            error: (err) => {
-                console.error(err);
-                this.toastr.error('No se pudo agregar el personaje', 'Error');
-                this.loadingFavorites.set(false);
-            }
-        });
+      this.loadingFavorites.set(true);
+      this.favoritesService.addFavorite(nombre, imagen).subscribe({
+        next: () => {
+          this.reloadFavorites();
+          this.toastr.success(`Agregado a favoritos`, '¡Éxito!');
+          this.loadingFavorites.set(false);
+        },
+        error: (err) => {
+          console.error(err);
+          this.toastr.error('No se pudo agregar el personaje', 'Error');
+          this.loadingFavorites.set(false);
+        }
+      });
     }
   }
 
@@ -159,16 +168,16 @@ export class SimpsonsPageComponent {
   confirmDelete() {
     const id = this.favoriteToDeleteId();
     if (id) {
-        this.favoritesService.deleteFavorite(id).subscribe({
-            next: () => {
-                this.reloadFavorites();
-                this.toastr.info('Personaje eliminado de favoritos', 'Eliminado');
-                this.favoriteToDeleteId.set(null);
-            },
-            error: (err) => {
-                this.toastr.error('Error al eliminar', 'Error');
-            }
-        });
+      this.favoritesService.deleteFavorite(id).subscribe({
+        next: () => {
+          this.reloadFavorites();
+          this.toastr.info('Personaje eliminado de favoritos', 'Eliminado');
+          this.favoriteToDeleteId.set(null);
+        },
+        error: (err) => {
+          this.toastr.error('Error al eliminar', 'Error');
+        }
+      });
     }
   }
 
@@ -191,9 +200,9 @@ export class SimpsonsPageComponent {
     if (id && customName) {
       this.favoritesService.updateFavorite(id, customName).subscribe({
         next: () => {
-            this.reloadFavorites();
-            this.toastr.success('Nombre actualizado correctamente');
-            this.cancelEditingFavorite();
+          this.reloadFavorites();
+          this.toastr.success('Nombre actualizado correctamente');
+          this.cancelEditingFavorite();
         },
         error: () => this.toastr.error('Error al actualizar')
       });
@@ -207,7 +216,7 @@ export class SimpsonsPageComponent {
 
   // Métodos de Paginación Local
   nextPage() {
-    this.currentPage.update(page => page + 1);
+    this.currentPage.update(page => Math.min(this.totalPages(), page + 1));
   }
 
   prevPage() {

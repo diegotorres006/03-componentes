@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-pagination-component',
+  // CORRECCIÓN CLAVE: Selector simplificado para evitar errores de coincidencia.
+  selector: 'app-pagination',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './pagination.html',
@@ -15,21 +16,21 @@ export class PaginationComponent {
   @Input() pages: number = 0;
   @Input() currentPage: number = 1;
 
-  // ⚠️ ESTA ES LA CLAVE: Enviamos eventos al padre cuando se hace clic
+  // CLAVE: Enviamos eventos al padre cuando se hace clic
   @Output() next = new EventEmitter<void>();
   @Output() prev = new EventEmitter<void>();
 
   // Cuando el usuario hace clic en "»" en el HTML
   onNext() {
     if (this.currentPage < this.pages) {
-      this.next.emit(); // ¡Avisamos al padre que cargue la siguiente!
+      this.next.emit(); // Avisamos al padre que cargue la siguiente.
     }
   }
 
   // Cuando el usuario hace clic en "«" en el HTML
   onPrev() {
     if (this.currentPage > 1) {
-      this.prev.emit(); // ¡Avisamos al padre que cargue la anterior!
+      this.prev.emit(); // Avisamos al padre que cargue la anterior.
     }
   }
 }

@@ -47,8 +47,12 @@ export class RegisterPage {
     // Effect para navegar cuando el registro sea exitoso
     effect(() => {
       if (this.registerResource.hasValue() && this.registerResource.value()) {
-        console.log('Registro exitoso, navegando a /simpsons');
-        this.router.navigate(['/simpsons']);
+        console.log('Registro exitoso, navegando a /home');
+        
+        // Aplicamos setTimeout para corregir problemas de navegación en GitHub Pages
+        setTimeout(() => {
+           this.router.navigate(['/home']);
+        }, 50);
       }
     });
   }
