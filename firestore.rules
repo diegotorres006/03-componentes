@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Reglas para la colección de favoritos
+    match /favorites/{favoriteId} {
+      
+      // 1. LECTURA: Solo si el dueño es el usuario autenticado
+      allow read: if request.auth != null && 
+                     resource.data.userId == request.auth.uid;
+      
+      // 2. CREACIÓN: Solo si está autenticado, el userId coincide y los datos son válidos
+      allow create: if request.auth != null && 
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.nombre is string &&
+                       request.resource.data.customName is string &&
+                       request.resource.data.image is string;
+      
+      // 3. ACTUALIZACIÓN: Solo el dueño puede editar
+      allow update: if request.auth != null && 
+                       resource.data.userId == request.auth.uid;
+      
+      // 4. ELIMINACIÓN: Solo el dueño puede borrar
+      allow delete: if request.auth != null && 
+                       resource.data.userId == request.auth.uid;
+    }
+  }
+}

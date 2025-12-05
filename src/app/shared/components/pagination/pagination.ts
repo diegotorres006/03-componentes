@@ -1,38 +1,35 @@
-import { ChangeDetectionStrategy, Component, computed, input, linkedSignal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-pagination-component',
-  imports: [RouterLink],
   standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './pagination.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./pagination.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PaginationComponent {
-  pages = input(0);
-  currentPage = input<number>(1);
-  activePage = linkedSignal(this.currentPage);
+  // Recibimos datos del padre (Página actual y Total)
+  @Input() pages: number = 0;
+  @Input() currentPage: number = 1;
 
-  getPagesList = computed(() => {
-    const totalPages = this.pages();
-    const current = this.activePage();
+  // ⚠️ ESTA ES LA CLAVE: Enviamos eventos al padre cuando se hace clic
+  @Output() next = new EventEmitter<void>();
+  @Output() prev = new EventEmitter<void>();
 
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
+  // Cuando el usuario hace clic en "»" en el HTML
+  onNext() {
+    if (this.currentPage < this.pages) {
+      this.next.emit(); // ¡Avisamos al padre que cargue la siguiente!
     }
-
-    const start = Math.max(1, current - 2);
-    const end = Math.min(totalPages, start + 4);
-
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-  });
-
- previousPage() {
-    if (this.activePage() > 1) this.activePage.update((n) => n - 1);
   }
 
-  nextPage() {
-    if (this.activePage() < this.pages()) this.activePage.update((n) => n + 1);
+  // Cuando el usuario hace clic en "«" en el HTML
+  onPrev() {
+    if (this.currentPage > 1) {
+      this.prev.emit(); // ¡Avisamos al padre que cargue la anterior!
+    }
   }
-
- }
+}

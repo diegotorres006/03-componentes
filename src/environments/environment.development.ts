@@ -1,4 +1,13 @@
 export const environment = {
-  production: true,
-  apiUrl: 'https://thesimpsonsapi.com/api'
+  production: false,
+  apiUrl: 'https://thesimpsonsapi.com/api',
+  firebaseConfig: {
+    apiKey: "AIzaSyBxH895__M_zjSuGALUr-QlJvbBGlbve0E",
+    authDomain: "ui-componentes.firebaseapp.com",
+    projectId: "ui-componentes",
+    storageBucket: "ui-componentes.firebasestorage.app",
+    messagingSenderId: "27096681604",
+    appId: "1:27096681604:web:b1c32e24018546211e46d1",
+    measurementId: "G-LC8D76RH04"
+  }
 };

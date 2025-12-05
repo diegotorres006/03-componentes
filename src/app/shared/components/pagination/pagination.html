@@ -1,29 +1,22 @@
-<div class="join flex justify-center items-center gap-2">
-  <button
-    class="join-item btn"
-    (click)="previousPage()"
-    [routerLink]="[]"
-    [queryParams]="{ page: activePage() - 1 }"
-    [disabled]="activePage() === 1"
-  >«</button>
-
-  @for (page of getPagesList(); track page) {
-  <button
-    class="join-item btn"
-    [class.btn-primary]="page === activePage()"
-    [routerLink]="[]"
-    [queryParams]="{ page: page }"
-    (click)="activePage.set(page)"
-  >
-    {{ page }}
+<div class="join">
+  <!-- Botón Anterior -->
+  <button 
+    class="join-item btn" 
+    [disabled]="currentPage <= 1"
+    (click)="onPrev()">
+    «
   </button>
-  }
 
-  <button
-    class="join-item btn"
-    [routerLink]="[]"
-    [queryParams]="{ page: activePage() + 1 }"
-    (click)="nextPage()"
-    [disabled]="activePage() === pages()"
-  >»</button>
+  <!-- Botón de Página Actual (Informativo) -->
+  <button class="join-item btn btn-disabled bg-base-200 text-base-content font-bold">
+    Página {{ currentPage }} de {{ pages }}
+  </button>
+
+  <!-- Botón Siguiente -->
+  <button 
+    class="join-item btn" 
+    [disabled]="currentPage >= pages"
+    (click)="onNext()">
+    »
+  </button>
 </div>

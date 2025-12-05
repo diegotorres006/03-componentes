@@ -2,75 +2,86 @@
     { label: 'Inicio', link: '/' },
     { label: 'Simpsons', link: '/simpsons' },
     { label: 'Personajes' }
-  ]" />
+  ]">
+</app-breadcumbs>
 
 <section class="p-6">
-  <app-hero-simpsons [simpsonsCount]=" simpsonsResource.value()?.count ?? 0"
-    [totalPages]="totalPages()"></app-hero-simpsons>
-
-  <!-- Tabla y paginación -->
-  <div class="mt-8">
-    <!-- ... contenido existente ... -->
-  </div>
+    @if (simpsonsResource()) {
+        <app-hero-simpsons 
+            [simpsonsCount]="simpsonsResource().count || 0"
+            [totalPages]="totalPages()">
+        </app-hero-simpsons>
+    }
 </section>
 
 <app-back-to-top></app-back-to-top>
 
 <section class="p-8">
-  <h1 class="text-3xl font-bold mb-2 text-center">The Simpsons API</h1>
-  <h2 class="text-lg text-center mb-6">Listado de personajes</h2>
+    <h1 class="text-3xl font-bold mb-2 text-center text-primary">The Simpsons API</h1>
+    <h2 class="text-lg text-center mb-6 opacity-75">Listado de personajes</h2>
 
-  <!-- Paginación y controles -->
-  @if (totalPages() > 0) {
-  <div class="flex gap-2 items-center h-20 mb-4">
-    <!-- Select desactivado (la API de los Simpsons no permite limitar resultados) -->
-    <!--
-    <select
-        class="select select-bordered w-32"
-        (change)="charactersPerPage.set(+selectPerPage.value)"
-        #selectPerPage
-    >
-        <option value="10">10</option>
-        <option value="20">20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-    </select>
-    -->
-    <app-pagination-component [pages]="totalPages()" [currentPage]="paginationService.currentPage()" />
+    @if (totalPages() > 0) {
+    <div class="flex gap-2 items-center h-20 mb-4 justify-between">
+        <!-- Paginación conectada a los métodos locales -->
+        <app-pagination-component 
+            [pages]="totalPages()" 
+            [currentPage]="currentPage()"
+            (next)="nextPage()" 
+            (prev)="prevPage()">
+        </app-pagination-component>
+    </div>
+    }
 
-    <div class="flex flex-1"></div>
-  </div>
-  }
-
-  <!-- Tabla de personajes -->
-    @if (simpsonsResource.hasValue()) {
-    <div class="overflow-x-auto">
-        <table class="table">
+    <!-- Tabla de Personajes -->
+    @if (simpsonsResource().results && simpsonsResource().results.length > 0) {
+    <div class="overflow-x-auto shadow-xl rounded-lg bg-base-100">
+        <table class="table w-full">
             <thead>
-                <tr>
+                <tr class="bg-base-200">
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Ocupación</th>
                     <th>Estado</th>
-                    <th></th>
+                    <th>Favorito</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                @for (personaje of simpsonsResource.value().results; track personaje.id) {
-                <tr>
-                    <td>{{ personaje.id }}</td>
-                    <td>{{ personaje.name }}</td>
-                    <td>{{ personaje.occupation }}</td>
+                @for (personaje of simpsonsResource().results; track personaje.id) {
+                <tr class="hover">
+                    <td class="font-mono text-xs opacity-50">{{ personaje.id }}</td>
+                    <td class="font-bold flex items-center gap-3">
+                        <div class="avatar">
+                            <div class="mask mask-squircle w-10 h-10">
+                                <!-- Usamos $any() para evitar errores de tipo TS estrictos -->
+                                <img [src]="$any(personaje).image" [alt]="personaje.name" />
+                            </div>
+                        </div>
+                        {{ personaje.name || $any(personaje).character }}
+                    </td>
+                    <td>{{ personaje.occupation || 'Desconocido' }}</td>
                     <td>
-                        <span class="badge badge-{{ personaje.status === 'Alive' ? 'success' : 'error' }}">
-                            {{ personaje.status }}
+                        <span class="badge" [ngClass]="{
+                            'badge-success': personaje.status === 'Alive',
+                            'badge-error': personaje.status === 'Dead',
+                            'badge-ghost': !personaje.status
+                        }">
+                            {{ personaje.status || 'Unknown' }}
                         </span>
                     </td>
                     <td>
-                        <a
-                            [routerLink]="['/simpsons', personaje.id]"
-                            class="btn btn-sm btn-primary"
-                        >
+                        @if (isFavorite(personaje.name || $any(personaje).character)) {
+                        <button class="btn btn-sm btn-ghost text-warning" disabled>
+                            ⭐ En favoritos
+                        </button>
+                        } @else {
+                        <button class="btn btn-sm btn-outline btn-warning" (click)="addToFavorites(personaje)">
+                            ⭐ Agregar
+                        </button>
+                        }
+                    </td>
+                    <td>
+                        <a [routerLink]="['/simpsons', personaje.id]" class="btn btn-sm btn-primary">
                             Ver Detalle
                         </a>
                     </td>
@@ -79,7 +90,118 @@
             </tbody>
         </table>
     </div>
+    } @else {
+        <div class="text-center py-10">
+            <span class="loading loading-dots loading-lg"></span>
+            <p>Cargando personajes...</p>
+        </div>
     }
-
-
 </section>
+
+<!-- Sección de Favoritos -->
+<section class="p-8 bg-base-200 mt-12 rounded-t-3xl shadow-inner">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold flex items-center gap-2">
+                <span>⭐</span> Mis Favoritos
+            </h2>
+            <button class="btn btn-sm btn-ghost" (click)="reloadFavorites()" [disabled]="loadingFavorites()">
+                @if (!loadingFavorites()) {
+                🔄 Actualizar
+                }
+            </button>
+        </div>
+
+        @if (loadingFavorites()) {
+        <!-- SKELETON LOADERS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            @for (item of [1,2,3,4]; track item) {
+            <div class="card bg-base-100 shadow-xl">
+                <div class="skeleton h-48 w-full rounded-none rounded-t-xl"></div>
+                <div class="card-body p-5">
+                    <div class="skeleton h-4 w-28 mb-2"></div>
+                    <div class="skeleton h-6 w-full mb-4"></div>
+                    <div class="flex justify-end gap-2">
+                        <div class="skeleton h-8 w-16 rounded-lg"></div>
+                        <div class="skeleton h-8 w-8 rounded-lg"></div>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        } @else if (favorites().length === 0) {
+        <div class="alert alert-info shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                class="stroke-current shrink-0 w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>No tienes favoritos aún. ¡Agrega algunos personajes de la tabla!</span>
+        </div>
+        } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            @for (favorite of favorites(); track favorite.id) {
+            <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300">
+                <figure class="px-4 pt-4 bg-base-200/30">
+                    <img [src]="favorite.image" [alt]="favorite.nombre" class="rounded-xl h-48 w-full object-contain" />
+                </figure>
+                <div class="card-body p-5">
+                    <h3 class="text-xs font-bold uppercase tracking-wider opacity-50">{{ favorite.nombre }}</h3>
+
+                    @if (editingFavoriteId() === favorite.id) {
+                    <!-- Formulario de Edición -->
+                    <form [formGroup]="editForm" class="form-control gap-2 mt-2">
+                        <input type="text" formControlName="customName" class="input input-bordered input-sm w-full focus:input-primary"
+                            [class.input-error]="editForm.get('customName')?.invalid && editForm.get('customName')?.touched"
+                            placeholder="Apodo personalizado" (keyup.enter)="saveEditedFavorite()"
+                            (keyup.escape)="cancelEditingFavorite()" />
+                        
+                        <div class="flex gap-2 mt-2">
+                            <button type="button" class="btn btn-xs btn-success flex-1 text-white" (click)="saveEditedFavorite()"
+                                [disabled]="editForm.invalid">
+                                Guardar
+                            </button>
+                            <button type="button" class="btn btn-xs btn-ghost flex-1" (click)="cancelEditingFavorite()">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
+                    } @else {
+                    <!-- Vista Normal -->
+                    <div class="text-lg font-extrabold text-primary truncate" title="{{ favorite.customName }}">
+                        {{ favorite.customName }}
+                    </div>
+
+                    <div class="card-actions justify-end mt-4 pt-4 border-t border-base-200">
+                        <button class="btn btn-sm btn-ghost hover:btn-active" (click)="startEditingFavorite(favorite)">
+                            ✏️ Editar
+                        </button>
+                        <!-- Llama al Modal -->
+                        <button class="btn btn-sm btn-ghost text-error hover:bg-error/10" (click)="openDeleteModal(favorite.id!)">
+                            🗑️
+                        </button>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</section>
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<dialog id="delete_modal" class="modal modal-bottom sm:modal-middle">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg text-error">Confirmar eliminación</h3>
+    <p class="py-4">¿Estás seguro de que deseas eliminar este personaje de tus favoritos?</p>
+    <div class="modal-action">
+      <form method="dialog">
+        <!-- El botón "Cancelar" cierra el modal (comportamiento por defecto de form dialog) -->
+        <button class="btn btn-ghost mr-2" (click)="favoriteToDeleteId.set(null)">Cancelar</button>
+        <!-- El botón eliminar ejecuta la acción -->
+        <button class="btn btn-error" (click)="confirmDelete()">Sí, Eliminar</button>
+      </form>
+    </div>
+  </div>
+</dialog>
